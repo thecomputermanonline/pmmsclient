@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
-import 'screens/splash_screen.dart';
+import 'screens/auth_gate.dart';
 
 void main() {
-  runApp(const HousingApp());
+  runApp(const RealEstateApp());
 }
 
-class HousingApp extends StatelessWidget {
-  const HousingApp({super.key});
+class RealEstateApp extends StatelessWidget {
+  const RealEstateApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
+    return MaterialApp(
+      title: 'Real Estate App',
       debugShowCheckedModeBanner: false,
-      home: SplashScreen(),
+      home: const AuthGate(),
     );
   }
 }

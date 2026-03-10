@@ -1,94 +1,6 @@
-// TO SEND FORGET TO SEND OTP
-
-/*
 import 'package:flutter/material.dart';
-//import '../services/api_service.dart';
-
-class OtpScreen extends StatefulWidget {
-  final String email; // Receive email from LoginScreen
-  const OtpScreen({super.key, required this.email});
-
-  @override
-  State<OtpScreen> createState() => _OtpScreenState();
-}
-
-class _OtpScreenState extends State<OtpScreen> {
-  final otpController = TextEditingController();
-  bool isVerifying = false;
-
-  Future<void> verifyOtp() async {
-    String otp = otpController.text.trim();
-
-    if (otp.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please enter the OTP")),
-      );
-      return;
-    }
-
-    setState(() => isVerifying = true);
-
-    try {
-      // Call backend API to verify OTP
-      // Example: await ApiService.verifyOtp(widget.email, otp);
-      await Future.delayed(const Duration(seconds: 1)); // mock delay
-
-      // For now, just show success
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("OTP verified successfully!")),
-      );
-
-      // TODO: Navigate to next screen (Update Profile)
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error verifying OTP: $e")),
-      );
-    } finally {
-      setState(() => isVerifying = false);
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Enter OTP")),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            Text(
-              "OTP sent to ${widget.email}",
-              style: const TextStyle(fontSize: 16),
-            ),
-            const SizedBox(height: 20),
-            TextField(
-              controller: otpController,
-              keyboardType: TextInputType.number,
-              decoration: const InputDecoration(
-                labelText: "Enter OTP",
-                border: OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: isVerifying ? null : verifyOtp,
-              style: ElevatedButton.styleFrom(
-                  minimumSize: const Size.fromHeight(50)),
-              child: isVerifying
-                  ? const CircularProgressIndicator(color: Colors.white)
-                  : const Text("Verify OTP"),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-} 
-*/
-
-//TO ALLOW TO NAVIGATE TO NEXT PAGE
-import 'package:flutter/material.dart';
-import 'profile_screen.dart'; // Make sure this file exists
+import '../services/api_service.dart';
+import 'profile_screen.dart';
 
 class OtpScreen extends StatefulWidget {
   final String email;
@@ -100,8 +12,10 @@ class OtpScreen extends StatefulWidget {
 }
 
 class _OtpScreenState extends State<OtpScreen> {
-  final otpController = TextEditingController();
+  final TextEditingController otpController = TextEditingController();
+
   bool isVerifying = false;
+  bool isResending = false;
 
   Future<void> verifyOtp() async {
     String otp = otpController.text.trim();
@@ -113,26 +27,72 @@ class _OtpScreenState extends State<OtpScreen> {
       return;
     }
 
-    setState(() => isVerifying = true);
+    if (otp.length != 6) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("OTP must be 6 digits")),
+      );
+      return;
+    }
 
-    // Simulate short delay
-    await Future.delayed(const Duration(seconds: 1));
+    setState(() {
+      isVerifying = true;
+    });
 
-    if (!mounted) return;
+    try {
+      bool success = await ApiService.verifyOtp(widget.email, otp);
 
-    setState(() => isVerifying = false);
+      if (!mounted) return;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("OTP Verified Successfully")),
-    );
+      if (success) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("OTP verified successfully")),
+        );
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const ProfileScreen()),
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Invalid OTP")),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Verification failed: $e")),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          isVerifying = false;
+        });
+      }
+    }
+  }
 
-    // Navigate to Profile Page and remove previous screens
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const ProfileScreen(),
-      ),
-    );
+  Future<void> resendOtp() async {
+    setState(() {
+      isResending = true;
+    });
+
+    try {
+      await ApiService.sendOtp(widget.email);
+
+      if (!mounted) return;
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("OTP resent successfully")),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Failed to resend OTP: $e")),
+      );
+    } finally {
+      if (mounted) {
+        setState(() {
+          isResending = false;
+        });
+      }
+    }
   }
 
   @override
@@ -144,20 +104,26 @@ class _OtpScreenState extends State<OtpScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Enter OTP")),
+      appBar: AppBar(
+        title: const Text("Verify OTP"),
+      ),
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            const SizedBox(height: 10),
             Text(
               "OTP sent to ${widget.email}",
-              style: const TextStyle(fontSize: 16),
+              style: const TextStyle(
+                fontSize: 16,
+              ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 30),
             TextField(
               controller: otpController,
               keyboardType: TextInputType.number,
+              maxLength: 6,
               decoration: const InputDecoration(
                 labelText: "Enter OTP",
                 border: OutlineInputBorder(),
@@ -173,6 +139,15 @@ class _OtpScreenState extends State<OtpScreen> {
                   ? const CircularProgressIndicator(color: Colors.white)
                   : const Text("Verify OTP"),
             ),
+            const SizedBox(height: 20),
+            Center(
+              child: TextButton(
+                onPressed: isResending ? null : resendOtp,
+                child: isResending
+                    ? const CircularProgressIndicator()
+                    : const Text("Resend OTP"),
+              ),
+            )
           ],
         ),
       ),

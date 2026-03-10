@@ -14,6 +14,8 @@ class Property {
   final bool furnished;
   final String landlordName;
   final double rating;
+  final String imageUrl;
+  final double squareFeet;
 
   Property({
     required this.id,
@@ -31,5 +33,7 @@ class Property {
     required this.furnished,
     required this.landlordName,
     required this.rating,
+    required this.imageUrl,
+    required this.squareFeet,
   });
 }

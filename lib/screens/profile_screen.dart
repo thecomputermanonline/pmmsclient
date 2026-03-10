@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:realestate_app/models/user_profile.dart';
 import 'property_listing_screen.dart';
+import '../services/profile_service.dart';
 
 class ProfileScreen extends StatefulWidget {
   final String? email;
@@ -32,7 +33,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     "Flic en Flac",
   ];
 
-  String selectedCity = "Port Louis";
+  String? selectedCity;
 
   /// Budget Options
   final List<String> budgetRanges = [
@@ -44,14 +45,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String? selectedBudget;
 
   @override
-  void initState() {
-    super.initState();
-    if (widget.email != null) {
-      emailController.text = widget.email!;
-    }
-  }
-
-  @override
   void dispose() {
     firstNameController.dispose();
     lastNameController.dispose();
@@ -60,22 +53,63 @@ class _ProfileScreenState extends State<ProfileScreen> {
     super.dispose();
   }
 
+  @override
+  void initState() {
+    super.initState();
+    _loadProfile();
+  }
+
+  Future<void> _loadProfile() async {
+    final profile = await ProfileService.getProfile() ??
+        await ProfileService.getCachedProfile();
+
+    if (profile != null) {
+      setState(() {
+        firstNameController.text = profile.firstName;
+        lastNameController.text = profile.lastName;
+        emailController.text = profile.email;
+        phoneController.text = profile.phone;
+        userType = profile.userType;
+        selectedCity = profile.city;
+        selectedBudget = profile.budget;
+      });
+    }
+  }
+
+  ///
   Future<void> saveProfile() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final prefs = await SharedPreferences.getInstance();
-
-    await prefs.setString("firstName", firstNameController.text.trim());
-    await prefs.setString("lastName", lastNameController.text.trim());
-    await prefs.setString("email", emailController.text.trim());
-    await prefs.setString("phone", phoneController.text.trim());
-    await prefs.setString("userType", userType);
-    await prefs.setString("city", selectedCity);
-    await prefs.setString("budget", selectedBudget ?? "");
-
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text("Profile Saved Successfully")),
+    final profile = UserProfile(
+      firstName: firstNameController.text.trim(),
+      lastName: lastNameController.text.trim(),
+      email: emailController.text.trim(), // keep email in sync
+      phone: phoneController.text.trim(),
+      userType: userType,
+      city: selectedCity ?? "Port Louis",
+      budget: selectedBudget ?? "",
     );
+
+    final success = await ProfileService.updateProfile(profile);
+
+    if (success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Profile Updated Successfully")),
+      );
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => PropertyListingScreen(
+            city: profile.city,
+            budget: profile.budget,
+          ),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Failed to update profile")),
+      );
+    }
   }
 
   @override
@@ -117,11 +151,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 keyboardType: TextInputType.emailAddress,
                 decoration: const InputDecoration(
                   labelText: "Email",
+                  //// value: widget.email,
                   border: OutlineInputBorder(),
                 ),
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return "Enter email";
+                    return widget.email == null ? "Enter email" : null;
                   }
                   if (!value.contains("@")) {
                     return "Enter valid email";
@@ -179,7 +214,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
               /// City Dropdown
               DropdownButtonFormField(
-                value: selectedCity,
+                // initialValue: selectedCity,
                 decoration: const InputDecoration(
                   labelText: "Preferred City",
                   border: OutlineInputBorder(),
@@ -201,7 +236,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
               /// Budget Dropdown
               DropdownButtonFormField(
-                value: selectedBudget,
+                // initialValue: selectedBudget,
                 decoration: const InputDecoration(
                   labelText: "Select Budget Range",
                   border: OutlineInputBorder(),
@@ -233,26 +268,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
 
               const SizedBox(height: 15),
-
-              /// GO TO PROPERTY LISTINGS
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => PropertyListingScreen(
-                        city: selectedCity,
-                        budget: selectedBudget ?? "",
-                      ),
-                    ),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  minimumSize: const Size.fromHeight(50),
-                  backgroundColor: Colors.green,
-                ),
-                child: const Text("View Property Listings"),
-              ),
             ],
           ),
         ),
