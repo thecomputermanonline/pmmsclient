@@ -60,13 +60,22 @@ class _LoginScreenState extends State<LoginScreen> {
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [
-            TextField(
+            TextFormField(
               controller: emailController,
               keyboardType: TextInputType.emailAddress,
               decoration: const InputDecoration(
                 labelText: "Enter Email",
                 border: OutlineInputBorder(),
               ),
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return "Enter email";
+                }
+                if (!value.contains("@")) {
+                  return "Enter valid email";
+                }
+                return null;
+              },
             ),
             const SizedBox(height: 20),
             ElevatedButton(

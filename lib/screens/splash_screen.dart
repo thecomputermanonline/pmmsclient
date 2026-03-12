@@ -41,7 +41,7 @@ class _SplashScreenState extends State<SplashScreen> {
     return const Scaffold(
       body: Center(
         child: Text(
-          "Flutter Motherland",
+          "Island Homes",
           style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
         ),
       ),

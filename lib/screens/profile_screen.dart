@@ -2,11 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:realestate_app/models/user_profile.dart';
 import 'property_listing_screen.dart';
 import '../services/profile_service.dart';
+import 'package:realestate_app/screens/property.dart';
 
 class ProfileScreen extends StatefulWidget {
-  final String? email;
-
-  const ProfileScreen({super.key, this.email});
+  const ProfileScreen({super.key});
 
   @override
   State<ProfileScreen> createState() => _ProfileScreenState();
@@ -20,7 +19,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final emailController = TextEditingController();
   final phoneController = TextEditingController();
 
-  String userType = "Student";
+  String userType = "Student"; // default to Student
 
   /// Mauritius Cities
   final List<String> mauritiusCities = [
@@ -33,7 +32,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     "Flic en Flac",
   ];
 
-  String? selectedCity;
+  late String selectedCity;
 
   /// Budget Options
   final List<String> budgetRanges = [
@@ -42,7 +41,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     "Rs 15,000 - Rs 20,000",
   ];
 
-  String? selectedBudget;
+  late String selectedBudget;
 
   @override
   void dispose() {
@@ -86,8 +85,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       email: emailController.text.trim(), // keep email in sync
       phone: phoneController.text.trim(),
       userType: userType,
-      city: selectedCity ?? "Port Louis",
-      budget: selectedBudget ?? "",
+      city: selectedCity,
+      budget: selectedBudget,
     );
 
     final success = await ProfileService.updateProfile(profile);
@@ -96,10 +95,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Profile Updated Successfully")),
       );
+
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => PropertyListingScreen(
+          builder: (_) => PropertyListingPage(
             city: profile.city,
             budget: profile.budget,
           ),
@@ -149,20 +149,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
               TextFormField(
                 controller: emailController,
                 keyboardType: TextInputType.emailAddress,
+                readOnly: true,
                 decoration: const InputDecoration(
                   labelText: "Email",
                   //// value: widget.email,
                   border: OutlineInputBorder(),
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return widget.email == null ? "Enter email" : null;
-                  }
-                  if (!value.contains("@")) {
-                    return "Enter valid email";
-                  }
-                  return null;
-                },
               ),
               const SizedBox(height: 20),
 
@@ -249,7 +241,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     .toList(),
                 onChanged: (value) {
                   setState(() {
-                    selectedBudget = value;
+                    selectedBudget = value!;
                   });
                 },
                 validator: (value) =>

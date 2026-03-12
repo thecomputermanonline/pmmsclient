@@ -69,7 +69,7 @@ class FavoritesScreen extends StatelessWidget {
 */
 
 import 'package:flutter/material.dart';
-import '../property_details_screen.dart';
+//import '../property_details_screen.dart';
 
 class FavoritesScreen extends StatelessWidget {
   final List<dynamic> favoriteProperties;
@@ -94,15 +94,15 @@ class FavoritesScreen extends StatelessWidget {
                 final property = favoriteProperties[index];
 
                 return GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) =>
-                            PropertyDetailsScreen(property: property),
-                      ),
-                    );
-                  },
+                  // onTap: () {
+                  //   Navigator.push(
+                  //     context,
+                  //     MaterialPageRoute(
+                  //       builder: (_) =>
+                  //           PropertyDetailsScreen(property: property),
+                  //     ),
+                  //   );
+                  // },
                   child: Card(
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
