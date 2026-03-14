@@ -115,16 +115,16 @@ class ApiService {
 
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
-import '../models/user_profile.dart';
+import 'user_session_service.dart';
+import '../../models/auth_response_model.dart';
+import '../../models/user_profile_model.dart';
 
 class ApiService {
-  static const String baseUrl = "http://localhost:5000/api";
+  static const String baseUrl = "http://127.0.0.1:5000/api";
 
   /// Get token
   static Future<String?> _getToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('jwt_token');
+    return UserSessionService.token;
   }
 
   /// Authenticated GET request
@@ -156,13 +156,13 @@ class ApiService {
   }
 
   /// LOAD USER PROFILE
-  static Future<UserProfile?> loadUserProfile() async {
+  static Future<UserProfileModel?> loadUserProfile() async {
     try {
       final response = await _authGet("/UserProfile/me");
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
-        return UserProfile.fromJson(data);
+        return UserProfileModel.fromJson(data);
       }
 
       print("Profile load failed: ${response.body}");
@@ -174,7 +174,7 @@ class ApiService {
   }
 
   /// Update User Profile
-  static Future<bool> updateUserProfile(UserProfile profile) async {
+  static Future<bool> updateUserProfile(UserProfileModel profile) async {
     try {
       final token = await _getToken();
       if (token == null) return false;
@@ -262,19 +262,15 @@ class ApiService {
       print("Verify OTP Response: ${response.statusCode} ${response.body}");
 
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
+        final data = AuthResponse.fromJson(jsonDecode(response.body));
 
-        if (data["success"] == true) {
-          String token = data["token"];
+        await UserSessionService.saveSession(
+          data.token,
+          data.user,
+        );
+        //final data = jsonDecode(response.body);
 
-          final prefs = await SharedPreferences.getInstance();
-          await prefs.setString('jwt_token', token);
-          await prefs.setString('user_email', email);
-
-          print("JWT token stored");
-
-          return true;
-        }
+        return true;
       }
 
       return false;

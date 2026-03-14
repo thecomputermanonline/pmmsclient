@@ -1,17 +1,21 @@
 import 'package:flutter/material.dart';
-import 'screens/auth_gate.dart';
+import 'core/services/user_session_service.dart';
+import 'core/auth/auth_gate.dart';
 
-void main() {
-  runApp(const RealEstateApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await UserSessionService.initialize();
+  runApp(const IslandHomes());
 }
 
-class RealEstateApp extends StatelessWidget {
-  const RealEstateApp({super.key});
+class IslandHomes extends StatelessWidget {
+  const IslandHomes({super.key});
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Real Estate App',
+      title: 'Island Homes',
       debugShowCheckedModeBanner: false,
       home: const AuthGate(),
     );

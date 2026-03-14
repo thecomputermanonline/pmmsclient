@@ -38,13 +38,23 @@ class _SplashScreenState extends State<SplashScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return Scaffold(
+      backgroundColor: Colors.white,
       body: Center(
-        child: Text(
-          "Island Homes",
-          style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+        child: Image.asset(
+          "assets/images/islandhomes_splash@3x.png",
         ),
       ),
     );
   }
+  // Widget build(BuildContext context) {
+  //   return const Scaffold(
+  //     body: Center(
+  //       child: Text(
+  //         "Island Homes",
+  //         style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+  //       ),
+  //     ),
+  //   );
+  // }
 }

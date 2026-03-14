@@ -185,12 +185,12 @@ class PropertyListingPage extends StatelessWidget {
     ///  SORT BY PRICE (LOW → HIGH)
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Island Homes'), elevation: 0),
+      //appBar: AppBar(title: const Text('Island Homes'), elevation: 0),
       body: filteredProperties.isEmpty
           ? ListView.builder(
-              itemCount: filteredProperties.length,
+              itemCount: allProperties.length,
               itemBuilder: (context, index) {
-                final property = filteredProperties[index];
+                final property = allProperties[index];
                 return PropertyCard(property: property);
               },
             )

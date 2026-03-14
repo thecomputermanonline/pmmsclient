@@ -1,8 +1,7 @@
+import 'package:IslandHomes/navigation/main_screen.dart';
 import 'package:flutter/material.dart';
-import 'package:realestate_app/models/user_profile.dart';
-import 'property_listing_screen.dart';
-import '../services/profile_service.dart';
-import 'package:realestate_app/screens/property.dart';
+import '../core/services/profile_service.dart';
+import '../models/user_profile_model.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -79,7 +78,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> saveProfile() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final profile = UserProfile(
+    final profile = UserProfileModel(
       firstName: firstNameController.text.trim(),
       lastName: lastNameController.text.trim(),
       email: emailController.text.trim(), // keep email in sync
@@ -96,14 +95,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
         const SnackBar(content: Text("Profile Updated Successfully")),
       );
 
-      Navigator.pushReplacement(
+      Navigator.pushAndRemoveUntil(
         context,
         MaterialPageRoute(
-          builder: (_) => PropertyListingPage(
-            city: profile.city,
-            budget: profile.budget,
-          ),
+          builder: (_) => MainScreen(),
         ),
+        (route) => false,
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
