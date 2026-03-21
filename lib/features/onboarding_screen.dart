@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'login_screen.dart';
+import 'auth/login_screen.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -12,7 +12,7 @@ class OnboardingScreen extends StatefulWidget {
 
 class _OnboardingScreenState extends State<OnboardingScreen> {
   final PageController _controller = PageController();
-  bool isLastPage = false;
+  int currentPage = 0;
 
   Future<void> completeOnboarding() async {
     final prefs = await SharedPreferences.getInstance();
@@ -29,56 +29,106 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     return Scaffold(
       body: Stack(
         children: [
+          /// 🔥 STATIC BACKGROUND
+          Positioned.fill(
+            child: Image.asset(
+              "assets/images/fullscreenbg.jpeg",
+              fit: BoxFit.cover,
+            ),
+          ),
+
+          /// 🔥 DARK OVERLAY
+          Positioned.fill(
+            child: Container(
+              color: Colors.black.withOpacity(0.5),
+            ),
+          ),
+
+          /// 🔥 PAGEVIEW CONTENT
           PageView(
             controller: _controller,
             onPageChanged: (index) {
-              setState(() {
-                isLastPage = index == 2;
-              });
+              setState(() => currentPage = index);
             },
             children: const [
               OnboardPage(
+                icon: Icons.home,
                 title: "Find Student Housing",
                 description:
                     "Browse verified student accommodations near your campus.",
               ),
               OnboardPage(
+                icon: Icons.verified_user,
                 title: "Secure & Trusted",
                 description: "Safe listings with verified landlords.",
               ),
               OnboardPage(
+                icon: Icons.flash_on,
                 title: "Easy Booking",
                 description: "Book your new home in just a few taps.",
               ),
             ],
           ),
 
-          // Indicator + Button
-          Container(
-            alignment: const Alignment(0, 0.85),
+          /// 🔥 TOP RIGHT SKIP BUTTON
+          Positioned(
+            top: 50,
+            right: 20,
+            child: TextButton(
+              onPressed: completeOnboarding,
+              child: const Text(
+                "Skip",
+                style: TextStyle(color: Colors.white, fontSize: 16),
+              ),
+            ),
+          ),
+
+          /// 🔥 BOTTOM CONTROLS
+          Positioned(
+            bottom: 50,
+            left: 20,
+            right: 20,
             child: Column(
-              mainAxisSize: MainAxisSize.min,
               children: [
                 SmoothPageIndicator(
                   controller: _controller,
                   count: 3,
-                  effect: const WormEffect(dotHeight: 10, dotWidth: 10),
+                  effect: const ExpandingDotsEffect(
+                    dotHeight: 8,
+                    dotWidth: 8,
+                    activeDotColor: Colors.white,
+                  ),
                 ),
-                const SizedBox(height: 20),
-                isLastPage
-                    ? ElevatedButton(
-                        onPressed: completeOnboarding,
-                        child: const Text("Get Started"),
-                      )
-                    : ElevatedButton(
-                        onPressed: () {
-                          _controller.nextPage(
-                            duration: const Duration(milliseconds: 500),
-                            curve: Curves.easeIn,
-                          );
-                        },
-                        child: const Text("Next"),
+
+                const SizedBox(height: 30),
+
+                /// 🔥 BUTTON
+                SizedBox(
+                  width: double.infinity,
+                  height: 55,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      if (currentPage == 2) {
+                        completeOnboarding();
+                      } else {
+                        _controller.nextPage(
+                          duration: const Duration(milliseconds: 500),
+                          curve: Curves.easeInOut,
+                        );
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF35AFBA),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(30),
                       ),
+                    ),
+                    child: Text(
+                      currentPage == 2 ? "Get Started" : "Next",
+                      style: const TextStyle(fontSize: 18, color: Colors.white),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -89,11 +139,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 }
 
 class OnboardPage extends StatelessWidget {
+  final IconData icon;
   final String title;
   final String description;
 
   const OnboardPage({
     super.key,
+    required this.icon,
     required this.title,
     required this.description,
   });
@@ -101,18 +153,48 @@ class OnboardPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(40),
+      padding: const EdgeInsets.symmetric(horizontal: 30),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.home, size: 120),
-          const SizedBox(height: 40),
+          /// 🔥 ICON WITH ANIMATION FEEL
+          TweenAnimationBuilder(
+            duration: const Duration(milliseconds: 800),
+            tween: Tween(begin: 0.0, end: 1.0),
+            builder: (context, value, child) {
+              return Transform.scale(
+                scale: value,
+                child: Opacity(
+                  opacity: value,
+                  child: child,
+                ),
+              );
+            },
+            child: Icon(icon, size: 120, color: Colors.white),
+          ),
+
+          const SizedBox(height: 50),
+
           Text(
             title,
-            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 26,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
           ),
+
           const SizedBox(height: 20),
-          Text(description, textAlign: TextAlign.center),
+
+          Text(
+            description,
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 16,
+              color: Colors.white70,
+            ),
+          ),
         ],
       ),
     );

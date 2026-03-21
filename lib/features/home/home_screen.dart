@@ -407,7 +407,7 @@ class _HomeScreenState extends State<HomeScreen> {
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../core/services/api_service.dart';
+import '../../core/services/api_service.dart';
 import 'favorites_screen.dart';
 
 class HomeScreen extends StatefulWidget {

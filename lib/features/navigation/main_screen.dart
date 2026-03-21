@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import '../features/profile_screen.dart';
-import '../features/property.dart';
+import '../profile/profile_screen.dart';
+import '../listings/property.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../features/home_screen.dart';
-import '../features/login_screen.dart';
+import '../home/home_screen.dart';
+import '../auth/login_screen.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});

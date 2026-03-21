@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../models/property_model.dart';
+import '../../models/property_model.dart';
 
 class PropertyListingPage extends StatelessWidget {
   final String city;

@@ -40,6 +40,7 @@ class ProfileService {
       userType: prefs.getString("userType") ?? "Student",
       city: prefs.getString("city") ?? "Port Louis",
       budget: prefs.getString("budget") ?? "",
+      propertyType: '',
     );
   }
 

@@ -26,6 +26,6 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-      - assets/images/africa.png
-      - assets/images/islandhomes_splash@3x.png
+      - assets/images/fullscreenbg.jpeg
+      - assets/bg_img/islandhomes_splash@3x.png
 

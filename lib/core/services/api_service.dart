@@ -120,7 +120,7 @@ import '../../models/auth_response_model.dart';
 import '../../models/user_profile_model.dart';
 
 class ApiService {
-  static const String baseUrl = "http://127.0.0.1:5000/api";
+  static const String baseUrl = "http://localhost:5000/api";
 
   /// Get token
   static Future<String?> _getToken() async {

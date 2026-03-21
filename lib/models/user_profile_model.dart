@@ -18,6 +18,8 @@ class UserProfileModel {
     required this.userType,
     required this.city,
     required this.budget,
+    required String propertyType,
+    String? school,
   });
 
   factory UserProfileModel.fromJson(Map<String, dynamic> json) {
@@ -30,8 +32,11 @@ class UserProfileModel {
       city: json['city'] ?? 'Port Louis',
       budget: json['budget'] ?? '',
       profileImageUrl: json['profileImageUrl'],
+      propertyType: '',
     );
   }
+
+  get propertyType => null;
   Map<String, dynamic> toJson() {
     return {
       "firstName": firstName,
